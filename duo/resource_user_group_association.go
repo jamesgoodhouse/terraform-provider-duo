@@ -31,7 +31,7 @@ func resourceUserGroupAssociation() *schema.Resource {
 	}
 }
 
-type AssociationResult struct {
+type UserGroupAssociationResult struct {
 	duoapi.StatResult
 }
 
@@ -51,7 +51,7 @@ func resourceUserGroupAssociationCreate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	result := &AssociationResult{}
+	result := &UserGroupAssociationResult{}
 	err = json.Unmarshal(body, result)
 	if err != nil {
 		return err
@@ -68,27 +68,25 @@ func resourceUserGroupAssociationRead(d *schema.ResourceData, meta interface{}) 
 	duoAdminClient := admin.New(*duoclient)
 	gid := d.Get("group_id").(string)
 	uid := d.Get("user_id").(string)
-	result, err := duoAdminClient.GetGroup(gid)
+	result, err := duoAdminClient.GetUserGroups(uid)
 	if err != nil {
 		return err
 	}
 	if result.Stat != "OK" {
-		return fmt.Errorf(fmt.Sprintf("could not find group %s", gid))
+		return fmt.Errorf(fmt.Sprintf("could not find groups for user %s", uid))
 	}
 
 	var found bool
-	var foundUser string
-	for _, v := range result.Response.Users {
-		if v.UserID == d.Get("user_id").(string) {
+	for _, v := range result.Response {
+		if v.GroupID == gid {
 			found = true
-			foundUser = v.UserID
 		}
 	}
 	if !found {
 		return fmt.Errorf("could not find group %s attached to user %s", gid, uid)
 	}
 	d.Set("group_id", gid)
-	d.Set("user_id", foundUser)
+	d.Set("user_id", uid)
 	return nil
 }
 
@@ -103,7 +101,7 @@ func resourceUserGroupAssociationDelete(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	result := &AssociationResult{}
+	result := &UserGroupAssociationResult{}
 	err = json.Unmarshal(body, result)
 	if err != nil {
 		return err

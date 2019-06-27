@@ -31,7 +31,7 @@ func resourceUserPhoneAssociation() *schema.Resource {
 	}
 }
 
-type AssociationResult struct {
+type UserPhoneAssociationResult struct {
 	duoapi.StatResult
 }
 
@@ -51,7 +51,7 @@ func resourceUserPhoneAssociationCreate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	result := &AssociationResult{}
+	result := &UserPhoneAssociationResult{}
 	err = json.Unmarshal(body, result)
 	if err != nil {
 		return err
@@ -103,7 +103,7 @@ func resourceUserPhoneAssociationDelete(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	result := &AssociationResult{}
+	result := &UserPhoneAssociationResult{}
 	err = json.Unmarshal(body, result)
 	if err != nil {
 		return err
